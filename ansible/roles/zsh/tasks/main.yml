@@ -1,0 +1,26 @@
+---
+# This role installs ZSH and makes it the default shell for users
+
+- name: Install ZSH
+  package: name=zsh state=installed
+
+- name: Install Git (required for oh-my-zsh)
+  package: name=git state=installed
+
+- name: Install curl (required for oh-my-zsh)
+  package: name=curl state=installed
+
+- name: Set ZSH as login shell and install oh-my-zsh for current set of users
+  script: files/set-zsh-shell.sh
+
+- name: Install root's zshrc
+  copy: src=zshrc dest=/root/.zshrc
+
+- name: Install root's zshenv
+  copy: src=zshenv dest=/root/.zshenv
+
+- name: Install root's zprofile
+  copy: src=zprofile dest=/root/.zprofile
+
+- name: Distribute zshrc to users
+  script: files/distribute-oh-my-zsh-config.sh

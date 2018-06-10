@@ -1,0 +1,177 @@
+# Path to your oh-my-zsh installation.
+export ZSH=$HOME/.oh-my-zsh
+
+# Set name of the theme to load.
+# Look in ~/.oh-my-zsh/themes/
+# Optionally, if you set this to "random", it'll load a random theme each
+# time that oh-my-zsh is loaded.
+ZSH_THEME="agnoster"
+
+# Uncomment the following line to use case-sensitive completion.
+# CASE_SENSITIVE="true"
+
+# Uncomment the following line to disable bi-weekly auto-update checks.
+# DISABLE_AUTO_UPDATE="true"
+
+# Uncomment the following line to change how often to auto-update (in days).
+# export UPDATE_ZSH_DAYS=13
+
+# Uncomment the following line to disable colors in ls.
+# DISABLE_LS_COLORS="true"
+
+# Uncomment the following line to disable auto-setting terminal title.
+# DISABLE_AUTO_TITLE="true"
+
+# Uncomment the following line to enable command auto-correction.
+# ENABLE_CORRECTION="true"
+
+# Uncomment the following line to display red dots whilst waiting for completion.
+COMPLETION_WAITING_DOTS="true"
+
+# Uncomment the following line if you want to disable marking untracked files
+# under VCS as dirty. This makes repository status check for large repositories
+# much, much faster.
+# DISABLE_UNTRACKED_FILES_DIRTY="true"
+
+# Uncomment the following line if you want to change the command execution time
+# stamp shown in the history command output.
+# The optional three formats: "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
+# HIST_STAMPS="mm/dd/yyyy"
+
+# Would you like to use another custom folder than $ZSH/custom?
+# ZSH_CUSTOM=/path/to/new-custom-folder
+
+# Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
+# Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
+# Example format: plugins=(rails git textmate ruby lighthouse)
+# Add wisely, as too many plugins slow down shell startup.
+plugins=(git common-aliases macports mvn rvm)
+
+# User configuration
+
+export DEFAULT_USER=richard  # stops agnoster theme showing user@host when logged in as myself on localhost
+
+source $ZSH/oh-my-zsh.sh
+
+# You may need to manually set your language environment
+# export LANG=en_US.UTF-8
+
+# Preferred editor for local and remote sessions
+# if [[ -n $SSH_CONNECTION ]]; then
+#   export EDITOR='vim'
+# else
+#   export EDITOR='mvim'
+# fi
+
+# Compilation flags
+# export ARCHFLAGS="-arch x86_64"
+
+# ssh
+# export SSH_KEY_PATH="~/.ssh/dsa_id"
+
+# Set personal aliases, overriding those provided by oh-my-zsh libs,
+# plugins, and themes. Aliases can be placed here, though oh-my-zsh
+# users are encouraged to define aliases within the ZSH_CUSTOM folder.
+# For a full list of active aliases, run `alias`.
+#
+# Example aliases
+# alias zshconfig="mate ~/.zshrc"
+# alias ohmyzsh="mate ~/.oh-my-zsh"
+
+if [ $( uname -s ) = "Darwin" ]; then
+    which gls >/dev/null && alias ls='gls --color=auto --classify'
+else
+    alias ls='ls --color=auto --classify'
+fi
+alias lla="ls $LS_OPTS -la"
+alias lltr="ls $LS_OPTS -ltr"
+alias listening='lsof -iTCP -sTCP:LISTEN -n -P'
+alias dryrsync='rsync --dry-run'
+alias gs='git status'
+alias gco='git checkout'
+alias jtrace='kill -SIGQUIT'
+
+findgrep() {
+    findcmd=(find)
+    while [ "$1" != "--" ]; do
+    findcmd+=("$1")
+    shift
+    done
+    shift
+    findcmd+=(-print0)
+    grepcmd=(xargs -0 grep -H)
+    while [ "$#" -gt 0 ]; do
+    grepcmd+=("$1")
+    shift
+    done
+
+    echo "$findcmd[@]" >&2
+    echo "$grepcmd[@]" >&2
+
+    "$findcmd[@]" | "$grepcmd[@]"
+}
+
+ispidalive() {
+    [ -z "$1" ] && ( echo usage: $0 pid; return 2 )
+    [ $( ps -p $1 | wc -l ) -gt 1 ] && return 1 || return 0
+}
+repkill() {
+    [ -z "$1" ] && ( echo usage: $0 pid; return 2 )
+    for sig in HUP TERM KILL; do
+    ispidalive $1 || return 0
+    echo kill -$sig $1
+    kill -$sig $1
+    sleep 3s
+    done
+    ispidalive $1 && echo 'Process could not be killed'
+}
+
+# Undo some things that oh-my-zsh does for me
+unsetopt share_history
+
+# Maven colorizing
+mvn-color()
+{
+  (
+  # Filter mvn output using sed. Before filtering set the locale to C, so invalid characters won't break some sed implementations
+  unset LANG
+  LC_CTYPE=C mvn $@ | sed \
+               -e "s/\(\[INFO\] \)\(----*\)$/\1${BOLD}${TEXT_GREEN}\2${RESET_FORMATTING}/g" \
+               -e "s/\(\[INFO\] \)\(Building.*\)/\1${BOLD}${TEXT_GREEN}\2${RESET_FORMATTING}/g" \
+               -e "s/\(\[INFO\] \)\(BUILD SUCCESSFUL\)/\1${BOLD}${TEXT_GREEN}\2${RESET_FORMATTING}/g" \
+               -e "s/\(\[INFO\] \)\(--- .* @ .* ---\)/\1${BOLD}${TEXT_BLUE}\2${RESET_FORMATTING}/g" \
+               -e "s/\(\[INFO\]\)\(.*\)/${BACKGROUND_MAGENTA}${BOLD}\1${RESET_FORMATTING}\2/g" \
+               -e "s/\(\[WARNING\]\)\(.*\)/${BOLD}${BACKGROUND_CYAN}\1${RESET_FORMATTING}\2/g" \
+               -e "s/\(\[ERROR\]\)\(.*\)/${BOLD}${BACKGROUND_RED}\1${RESET_FORMATTING}\2/g" \
+               -e "s/\(Downloaded:.*\)\$/${TEXT_MAGENTA}\1${RESET_FORMATTING}/g" \
+               -e "s/\(Downloading:.*\)\$/${TEXT_MAGENTA}\1${RESET_FORMATTING}/g" \
+               -e "s/Tests run: \([^,]*\), Failures: \([^,]*\), Errors: \([^,]*\), Skipped: \([^,]*\)/${BOLD}${TEXT_GREEN}Tests run: \1${RESET_FORMATTING}, Failures: ${BOLD}${TEXT_RED}\2${RESET_FORMATTING}, Errors: ${BOLD}${TEXT_RED}\3${RESET_FORMATTING}, Skipped: ${BOLD}${TEXT_YELLOW}\4${RESET_FORMATTING}/g"
+  rc="${pipestatus[1]}"
+ 
+  # Make sure formatting is reset
+  echo -ne ${RESET_FORMATTING}
+  exit $rc
+  )
+}
+alias mvn=mvn-color
+
+# Maven repository artifact access
+mvn-localinstall()
+{
+    [ -z "$1" ] && { echo >&2 "usage: $0 artifactId"; echo >&2 "example: $0 org.apache.jclouds.provider:digitalocean2:2.0.1"; return 1 }
+    mvn org.apache.maven.plugins:maven-dependency-plugin:3.0.1:get -U "-Dartifact=$1" -Dtransitive=false -DremoteRepositories=cloudsoft-libs-release::default::https://artifactory.cloudsoftcorp.com/artifactory/libs-release,cloudsoft-libs-snapshot::default::https://artifactory.cloudsoftcorp.com/artifactory/libs-snapshot,cloudsoft-plugins-release::default::https://artifactory.cloudsoftcorp.com/artifactory/plugins-release,cloudsoft-plugins-snapshot::default::https://artifactory.cloudsoftcorp.com/artifactory/plugins-snapshot,apache-snapshots::default::https://repository.apache.org/content/repositories/snapshots
+}
+mvn-get()
+{
+    [ -z "$1" ] && { echo >&2 "usage: $0 artifactId [location]"; echo >&2 "example: $0 org.apache.jclouds.provider:digitalocean2:2.0.1 ./deploy"; return 1 }
+    mvn org.apache.maven.plugins:maven-dependency-plugin:3.0.1:copy "-Dartifact=$1" "-DoutputDirectory=${2:-.}"
+}
+
+[ -f ${HOME}/.zshrc.local ] && . ${HOME}/.zshrc.local
+
+# Decode AWS STS authorization error messages
+function aws-sts-decode-authorization-message() {
+    aws sts --profile downer decode-authorization-message --encoded-message "$1" | ruby -e 'require "json"' -e 's = STDIN.read' -e 'o = JSON.parse(s)' -e 'puts o["DecodedMessage"]' | json_pp
+}
+
+[[ -s "$HOME/.profile" ]] && source "$HOME/.profile" # Load the default .profile

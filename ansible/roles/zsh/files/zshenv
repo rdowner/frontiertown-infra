@@ -1,0 +1,20 @@
+# According to zsh man page, the following files are read during startup, in this order:
+#
+# /etc/zshenv
+# ~/.zshenv
+# /etc/zprofile  [login shell only]
+# ~/.zprofile    [login shell only]
+# /etc/zshrc     [interactive shell only]
+# ~/.zshrc       [interactive shell only]
+# /etc/zlogin    [login shell only]
+# ~/.zlogin      [login shell only]
+#
+# As the OSX /etc/zprofile processes the PATH variable, we must do our PATH processing in ~/.zprofile, after OSX, and NOT in here.
+
+
+# Maven
+export MAVEN_OPTS="-Xmx512m -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=512M"
+
+# Local settings
+[ -r ${HOME}/.zshenv.local ] && source ${HOME}/.zshenv.local
+
