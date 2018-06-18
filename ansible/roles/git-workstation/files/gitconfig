@@ -1,0 +1,75 @@
+[filter "media"]
+    clean = git-media-clean %f
+    smudge = git-media-smudge %f
+[user]
+    name = Richard Downer
+    email = richard@apache.org
+    signingkey = 1801208C
+[credential]
+    helper = osxkeychain
+[push]
+    default = simple
+[alias]
+    fetchall = fetch --all
+    up = pull --rebase --all
+    sup = "! git pull --rebase --all && git submodule update --remote --merge --recursive"
+    irebase = rebase --interactive
+    arebase = rebase --abort
+    crebase = rebase --continue
+    le = log --oneline --decorate
+    ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
+    ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate
+    lds = log --pretty=format:"%C(yellow)%h\\ %ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short
+    ld = log --pretty=format:"%C(yellow)%h\\ %ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=relative
+    lc  = "!f() { git ll "$1"^.."$1"; }; f"
+    lnc = log --pretty=format:"%h\\ %s\\ [%cn]"
+    pick = cherry-pick
+    co = checkout
+    amend = commit --amend --no-edit
+    restage = reset --soft HEAD^
+
+# Triangular workflow. Inspired by https://github.com/blog/2042-git-2-5-including-multiple-worktrees-and-triangular-workflows
+    triangle = "!f() { git config triangle.from ${1-upstream} ; git config remote.pushdefault ${2-rdowner}; git config push.default current; }; f"
+    new = "!f() { from=${3-$( git config --get triangle.from )}; [ -z \"$from\" ] && { echo run git triangle first; exit 1; }; echo creating new branch $1 based off $from/${2-master}; git fetch --all; git branch $1 $from/${2-master}; git checkout $1; }; f"
+    pullwhere = rev-parse --abbrev-ref '@{u}'
+    pushwhere = rev-parse --abbrev-ref '@{push}'
+    pushwhat = log @{push}..
+
+    # From http://haacked.com/archive/2014/07/28/github-flow-aliases/:
+    # All modified and new files saved to a temporary commit
+    saveall = !git add -A && git commit -m 'SAVEPOINT'
+    # All modified files (but not new ones) saves to a temporary commit
+    save = !git add -u && git commit -m 'SAVEPOINT'
+    # Un-commit; last commit removed and its changes go back into the workspace
+    undo = reset HEAD~1 --mixed
+    # commits everything then does a hard reset to remove that commit - in an emergency, there are ways to recover the commit
+    wipe = !git add -A && git commit -qm 'WIPE SAVEPOINT' && git reset HEAD~1 --hard
+    # Clean up merged branches
+    bclean = "!f() { git branch --merged ${1-master} | grep -v " ${1-master}$" | xargs -t git branch -d; }; f"
+    # Go to master, update, and clean up merged branches
+    bdone = "!f() { git checkout ${1-master} && git up && git bclean ${1-master}; }; f"
+
+    # Stuff to help in picking a series of commits
+    diverge-point = !zsh -c 'diff --old-line-format= --new-line-format= <(git rev-list --first-parent \"${1:-master}\") <(git rev-list --first-parent \"${2:-HEAD}\") | head -1' -
+    rev-list-since-diverge = !git rev-list `git diverge-point "${1:-master}" "${2:-HEAD}"`.."${1:-master}"
+    qs = ! echo \"$( git name-rev --name-only HEAD )\" \"$( git diff-index --shortstat HEAD )\" \"$( git status --porcelain 2>/dev/null| grep \"^??\" | wc -l ) untracked files\"
+    sqs = "! git submodule foreach --quiet 'echo \"$( basename $( pwd ) ): \\c\"; git qs'"
+
+[mergetool "intellij"]
+    cmd = "/Applications/IntelliJ\\ IDEA\\ 14.app/Contents/MacOS/idea" merge "$(cd $(dirname "$LOCAL") && pwd)/$(basename "$LOCAL")" "$(cd $(dirname "$REMOTE") && pwd)/$(basename "$REMOTE")" "$(cd $(dirname "$BASE") && pwd)/$(basename "$BASE")" "$(cd $(dirname "$MERGED") && pwd)/$(basename "$MERGED")"
+    trustExitCode = true
+[difftool "intellij"]
+    cmd = "/Applications/IntelliJ IDEA 14.app/Contents/MacOS/idea" diff "$(cd $(dirname "$LOCAL") && pwd)/$(basename "$LOCAL")" "$(cd $(dirname "$REMOTE") && pwd)/$(basename "$REMOTE")"
+
+[diff]
+    tool = bc3
+[merge]
+    tool = bc3
+[mergetool]
+    bc3 = trustExitCode
+[core]
+    pager = less -F -X
+[hub]
+    protocol = https
+[commit]
+    gpgsign = true

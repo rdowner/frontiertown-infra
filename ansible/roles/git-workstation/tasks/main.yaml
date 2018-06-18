@@ -1,0 +1,8 @@
+---
+# Install git and a workstation .gitconfig
+
+- name: Install Git (required for oh-my-zsh)
+  package: name=git state=installed
+
+- name: Install .gitconfig
+  copy: src=gitconfig dest=~{{ansible_user}}/.gitconfig
