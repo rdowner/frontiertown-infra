@@ -1,0 +1,8 @@
+---
+# Install tmux
+
+- name: Install tmux
+  package: name=tmux state=present
+
+- name: Install .tmux.conf
+  copy: src=tmux.conf dest=~{{ansible_user}}/.tmux.conf owner={{ansible_user}}

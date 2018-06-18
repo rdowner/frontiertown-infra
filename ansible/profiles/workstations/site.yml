@@ -3,3 +3,4 @@
   roles:
   - zsh
   - git-workstation
+  - tmux
