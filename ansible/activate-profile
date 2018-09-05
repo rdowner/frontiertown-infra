@@ -3,21 +3,21 @@
 profile="$1"
 if [ -z "$profile" ]; then
     echo >&2 "Please supply a profile name"
-    return 1
+    exit 1
 fi
 
 my_location="$( cd "$( dirname $0 )" && pwd )"
 profile_dir="${my_location}/profiles/${profile}"
 if [ \! -d "${profile_dir}" ]; then
     echo >$2 "Expected to find a directory at ${profile_dir}. Is the profile name correct?"
-    return 1
+    exit 1
 fi
 
 ANSIBLE_CONFIG="${profile_dir}/ansible.cfg"
 if [ \! -f "${ANSIBLE_CONFIG}" ]; then
     echo >$2 "Expected to find a filr at ${ANSIBLE_CONFIG}. Is the profile name correct?"
-    return 1
+    exit 1
 fi
 
-export ANSIBLE_CONFIG
-return 0
+echo "export ANSIBLE_CONFIG=\"$ANSIBLE_CONFIG\""
+exit 0
