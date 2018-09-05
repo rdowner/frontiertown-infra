@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+set -e
+set -x
+
+case "$( cat /etc/system-release )" in
+  "Amazon Linux 2")
+    sudo yum update -y
+    sudo yum install -y git-core python2-pip util-linux-user
+    ;;
+esac
+
+export PATH="${HOME}/.local/bin:${PATH}"
+
+pip install --upgrade --user pip
+
+pip install --user virtualenvwrapper
+export WORKON_HOME=~/Envs
+source virtualenvwrapper.sh
+
+if [ '!' -f "${HOME}/.ssh/id_rsa.pub" ]; then
+  ssh-keygen -t rsa -N '' -f "${HOME}/.ssh/id_rsa"
+fi
+cat "${HOME}/.ssh/id_rsa.pub" >> "${HOME}/.ssh/authorized_keys"
+ssh-keyscan -H localhost >> ~/.ssh/known_hosts
+
+if [ '!' -d frontiertown-infra ]; then
+  git clone https://github.com/rdowner/frontiertown-infra.git
+fi
+cd frontiertown-infra/ansible
+eval $( ./activate-profile workstations )
+cat >profiles/workstations/hosts <<EOF
+---
+all:
+    hosts:
+        127.0.0.1:
+            ansible_user: ${LOGNAME}
+            ansible_become: true
+EOF
+
+if [ '!' -d "${WORKON_HOME}/ansible" ]; then
+  mkvirtualenv -i ansible ansible
+fi
+source "${WORKON_HOME}/ansible/bin/activate"
+
+ansible-playbook profiles/workstations/site.yml
+deactivate
