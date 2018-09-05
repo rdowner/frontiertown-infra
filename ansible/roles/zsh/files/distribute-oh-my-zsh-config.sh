@@ -5,9 +5,10 @@ zsh="$( grep zsh /etc/shells | head -1 )"
 function config_user() {
     u=$1
     cursh="$( getent passwd $u | cut -d: -f7 )"
-    [ "${cursh}" = "${zsh}" ] || continue
+    [ "${cursh}" = "${zsh}" ] && return
+    sudo chsh -s "${zsh}" "${u}"
     home="$( getent passwd $u | cut -d: -f6)"
-    [ -d "${home}/.oh-my-zsh" ] || continue
+    [ -d "${home}/.oh-my-zsh" ] || return
     cp ~/.zshrc "${home}/.zshrc"
     cp ~/.zshenv "${home}/.zshenv"
     cp ~/.zprofile "${home}/.zprofile"
