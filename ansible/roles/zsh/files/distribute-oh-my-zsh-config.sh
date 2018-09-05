@@ -12,7 +12,7 @@ function config_user() {
     cp ~/.zshrc "${home}/.zshrc"
     cp ~/.zshenv "${home}/.zshenv"
     cp ~/.zprofile "${home}/.zprofile"
-    chown $u:$u "${home}/.zshrc" "${home}/.zshenv" "${home}/.zshprofile"
+    chown $u:$u "${home}/.zshrc" "${home}/.zshenv" "${home}/.zprofile"
 }
 
 for user in $( getent passwd | cut -d: -f1 ); do
