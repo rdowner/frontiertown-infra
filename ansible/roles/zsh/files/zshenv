@@ -15,6 +15,9 @@
 # Maven
 export MAVEN_OPTS="-Xmx512m -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=512M"
 
+# GnuPG
+export GPG_TTY="$(tty)"
+
 # Local settings
 [ -r ${HOME}/.zshenv.local ] && source ${HOME}/.zshenv.local
 

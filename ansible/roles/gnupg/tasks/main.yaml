@@ -1,0 +1,27 @@
+---
+# Install GnuPG and configuration
+
+- name: Install GnuPG2
+  package: name=gnupg2 state=installed
+
+- name: Create .gnupg directory
+  file:
+    path: ~{{ansible_user}}/.gnupg
+    state: directory
+    owner: "{{ansible_user}}"
+    group: "{{ansible_user}}"
+    mode: 0700
+
+- name: Install gpg.conf
+  copy:
+    src: gpg.conf
+    dest: ~{{ansible_user}}/.gnupg/gpg.conf
+    owner: "{{ansible_user}}"
+    group: "{{ansible_user}}"
+
+- name: Install gpg-agent.conf
+  copy:
+    src: gpg-agent.conf
+    dest: ~{{ansible_user}}/.gnupg/gpg-agent.conf
+    owner: "{{ansible_user}}"
+    group: "{{ansible_user}}"
