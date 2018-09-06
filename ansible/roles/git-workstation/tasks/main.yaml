@@ -5,4 +5,29 @@
   package: name=git state=installed
 
 - name: Install .gitconfig
-  copy: src=gitconfig dest=~{{ansible_user}}/.gitconfig
+  copy:
+    src: gitconfig
+    dest: ~{{ansible_user}}/.gitconfig
+    owner: "{{ansible_user}}"
+    group: "{{ansible_user}}"
+
+- name: Configure credential helper for macOS
+  when: ansible_os_family == "Darwin"
+  command: git config --global credential.helper osxkeychain
+  become: yes
+  become_user: "{{ansible_user}}"
+
+- name: Configure credential helper for Windows
+  when: ansible_os_family == "Windows"
+  command: git config --global credential.helper manager
+  become: yes
+  become_user: "{{ansible_user}}"
+  # FIXME: needs to also install https://github.com/Microsoft/Git-Credential-Manager-for-Windows
+
+- name: Configure credential helper for other OS
+  when:
+    - ansible_os_family != "Darwin"
+    - ansible_os_family != "Windows"
+  command: git config --global credential.helper store
+  become: yes
+  become_user: "{{ansible_user}}"
