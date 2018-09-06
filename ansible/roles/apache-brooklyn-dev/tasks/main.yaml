@@ -1,0 +1,42 @@
+---
+- name: Install Java
+  package: name=java-1.8.0-openjdk-headless state=installed
+
+- name: Install JDK
+  package: name=java-1.8.0-openjdk-devel state=installed
+
+- name: Install Golang
+  package: name=golang state=installed
+
+- name: Install procps
+  package: name=procps state=installed
+
+- name: Install libpng-devel
+  package: name=libpng-devel state=installed
+
+- name: Install make
+  package: name=make state=installed
+
+- name: Install automake
+  package: name=automake state=installed
+
+- name: Install autoconf
+  package: name=autoconf state=installed
+
+- name: Install libtool
+  package: name=libtool state=installed
+
+- name: Install pkgconfig
+  package: name=pkg-config state=installed
+
+- name: Install nasm
+  package: name=nasm state=installed
+
+- name: Install gcc
+  package: name=gcc state=installed
+
+- name: Install rpm-build
+  package: name=rpm-build state=installed
+
+- name: Install dpkg
+  script: files/build-and-install-dpkg.sh
