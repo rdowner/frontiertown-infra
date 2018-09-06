@@ -7,13 +7,23 @@ status() {
 }
 
 status "OS-specific preparation"
-OS="$( cat /etc/system-release 2>/dev/null || true )"
-[ -z "${OS}" ] && OS="$( uname )"
+if [ -f /etc/os-release ]; then
+  eval $( source /etc/os-release && echo distro_name=\"$NAME $VERSION_ID\" )
+elif [ -f /etc/system-release ]; then
+  distro_name="$( cat /etc/system-release )"
+else
+  distro_name="$( uname )"
+fi
 
-case "${OS}" in
+case $distro_name in
   "Amazon Linux 2"|"Amazon Linux release 2 "*)
     sudo yum update -y
     sudo yum install -y git-core python2-pip util-linux-user
+    ;;
+  "Ubuntu 18.04")
+    sudo apt-get update -y
+    sudo apt-get upgrade -y
+    sudo apt-get install -y git python-pip
     ;;
   "Darwin")
     brew install python
@@ -22,18 +32,23 @@ case "${OS}" in
     ;;
 esac
 
-export PATH="${HOME}/.local/bin:${PATH}"
-
 status "Install/update pip and virtualenvwrapper"
 pip install --upgrade --user pip
-hash -d pip   # bash remembers where commands are - tell it to forget pip, because we might have a new one now
+# bash remembers where commands are - tell it to forget pip, because we might have a new one now
+hash -d pip
+# Now put .local/bin at the front of the path, as that's where pip will be (except maybe on MacOS...?)
+export PATH="${HOME}/.local/bin:${PATH}"
+
 pip install --user virtualenvwrapper
 export WORKON_HOME=~/Envs
 source virtualenvwrapper.sh
 
 status "Set up SSH-to-localhost"
-if [ '!' -f "${HOME}/.ssh/id_rsa.pub" ]; then
+if [ '!' -f "${HOME}/.ssh/id_rsa" ]; then
   ssh-keygen -t rsa -N '' -f "${HOME}/.ssh/id_rsa"
+fi
+if [ '!' -f "${HOME}/.ssh/id_rsa.pub" ]; then
+  ssh-keygen -y -f "${HOME}/.ssh/id_rsa" > "${HOME}/.ssh/id_rsa.pub"
 fi
 cat "${HOME}/.ssh/id_rsa.pub" >> "${HOME}/.ssh/authorized_keys"
 ssh-keyscan -H localhost >> ~/.ssh/known_hosts
@@ -56,7 +71,7 @@ EOF
 
 if [ '!' -d "${WORKON_HOME}/ansible" ]; then
   status "Create virtualenv for Ansible"
-  /usr/bin/env bash -c '{ source virtualenvwrapper.sh; mkvirtualenv -i ansible ansible; }'
+  /usr/bin/env bash -c '{ source virtualenvwrapper.sh; mkvirtualenv ansible; }'
 fi
 status "Activate Ansible"
 source "${WORKON_HOME}/ansible/bin/activate"
