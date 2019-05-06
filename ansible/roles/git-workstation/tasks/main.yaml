@@ -3,13 +3,13 @@
 
 - name: Install Git (required for oh-my-zsh)
   package: name=git state=installed
+  become: "{{ 'no' if ansible_os_family == 'Darwin' else 'yes' }}"
 
 - name: Install .gitconfig
   copy:
     src: gitconfig
     dest: ~{{ansible_user}}/.gitconfig
     owner: "{{ansible_user}}"
-    group: "{{ansible_user}}"
 
 - name: Configure credential helper for macOS
   when: ansible_os_family == "Darwin"

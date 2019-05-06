@@ -3,24 +3,37 @@
 
 - name: Install ZSH
   package: name=zsh state=installed
+  become: "{{ 'no' if ansible_os_family == 'Darwin' else 'yes' }}"
 
 - name: Install Git (required for oh-my-zsh)
   package: name=git state=installed
+  become: "{{ 'no' if ansible_os_family == 'Darwin' else 'yes' }}"
 
 - name: Install curl (required for oh-my-zsh)
   package: name=curl state=installed
+  become: "{{ 'no' if ansible_os_family == 'Darwin' else 'yes' }}"
+
+- name: Install zshrc
+  copy:
+    src: zshrc
+    dest: ~{{ansible_user}}/.zshrc
+    owner: "{{ansible_user}}"
+  become: yes
+
+- name: Install zshenv
+  copy:
+    src: zshenv
+    dest: ~{{ansible_user}}/.zshenv
+    owner: "{{ansible_user}}"
+  become: yes
+
+- name: Install zprofile
+  copy:
+    src: zprofile
+    dest: ~{{ansible_user}}/.zprofile
+    owner: "{{ansible_user}}"
+  become: yes
 
 - name: Set ZSH as login shell and install oh-my-zsh for current set of users
-  script: files/set-zsh-shell.sh
-
-- name: Install root's zshrc
-  copy: src=zshrc dest=/root/.zshrc
-
-- name: Install root's zshenv
-  copy: src=zshenv dest=/root/.zshenv
-
-- name: Install root's zprofile
-  copy: src=zprofile dest=/root/.zprofile
-
-- name: Distribute zshrc to users
-  script: files/distribute-oh-my-zsh-config.sh
+  script: files/set-zsh-shell.sh "{{ansible_user}}"
+  become: yes

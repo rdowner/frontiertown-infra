@@ -1,23 +1,37 @@
 #!/usr/bin/env bash
 
 set -e
-set -x
 
-case "$( cat /etc/system-release )" in
-  "Amazon Linux 2")
+status() {
+  echo >&2 "$(tput setaf 2)$@$(tput sgr0)"
+}
+
+status "OS-specific preparation"
+OS="$( cat /etc/system-release 2>/dev/null || true )"
+[ -z "${OS}" ] && OS="$( uname )"
+
+case "${OS}" in
+  "Amazon Linux 2"|"Amazon Linux release 2 "*)
     sudo yum update -y
     sudo yum install -y git-core python2-pip util-linux-user
+    ;;
+  "Darwin")
+    brew install python
+    export PATH="/usr/local/opt/python/libexec/bin:${PATH}"
+    export PATH="$( python -m site --user-base )/bin:$PATH"
     ;;
 esac
 
 export PATH="${HOME}/.local/bin:${PATH}"
 
+status "Install/update pip and virtualenvwrapper"
 pip install --upgrade --user pip
-
+hash -d pip   # bash remembers where commands are - tell it to forget pip, because we might have a new one now
 pip install --user virtualenvwrapper
 export WORKON_HOME=~/Envs
 source virtualenvwrapper.sh
 
+status "Set up SSH-to-localhost"
 if [ '!' -f "${HOME}/.ssh/id_rsa.pub" ]; then
   ssh-keygen -t rsa -N '' -f "${HOME}/.ssh/id_rsa"
 fi
@@ -25,8 +39,11 @@ cat "${HOME}/.ssh/id_rsa.pub" >> "${HOME}/.ssh/authorized_keys"
 ssh-keyscan -H localhost >> ~/.ssh/known_hosts
 
 if [ '!' -d frontiertown-infra ]; then
+  status "Git clone frontiertown-infra"
   git clone https://github.com/rdowner/frontiertown-infra.git
 fi
+
+status "Prepare Ansible"
 cd frontiertown-infra/ansible
 eval $( ./activate-profile workstations )
 cat >profiles/workstations/hosts <<EOF
@@ -35,13 +52,27 @@ all:
     hosts:
         127.0.0.1:
             ansible_user: ${LOGNAME}
-            ansible_become: true
 EOF
 
 if [ '!' -d "${WORKON_HOME}/ansible" ]; then
-  mkvirtualenv -i ansible ansible
+  status "Create virtualenv for Ansible"
+  /usr/bin/env bash -c '{ source virtualenvwrapper.sh; mkvirtualenv -i ansible ansible; }'
 fi
+status "Activate Ansible"
 source "${WORKON_HOME}/ansible/bin/activate"
 
-ansible-playbook profiles/workstations/site.yml
+status "Install Ansible"
+pip install --upgrade ansible
+
+status "Running Ansible playbook"
+ANSIBLE_OPTS=()
+if [ -t 1 ]
+then
+    ANSIBLE_OPTS+=('--ask-become-pass')
+fi
+ansible-playbook "${ANSIBLE_OPTS[@]}" profiles/workstations/site.yml
+
+status "Deactivate Ansible profile"
 deactivate
+
+status "Done"

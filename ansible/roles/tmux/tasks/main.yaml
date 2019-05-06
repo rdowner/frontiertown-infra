@@ -3,6 +3,7 @@
 
 - name: Install tmux
   package: name=tmux state=present
+  become: "{{ 'no' if ansible_os_family == 'Darwin' else 'yes' }}"
 
 - name: Install .tmux.conf
   copy: src=tmux.conf dest=~{{ansible_user}}/.tmux.conf owner={{ansible_user}}
