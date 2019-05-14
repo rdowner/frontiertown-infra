@@ -69,6 +69,11 @@ for u in $users_dedup; do
     [ -d "${home}/.oh-my-zsh" ] || (
         echo "Install oh-my-zsh for user $u"
         su -l "${u}" -c "echo exit | sh /tmp/install-oh-my-zsh.sh"
+
+        if [ "${copyfromuser}" '=' "${u}" ]; then
+            # The installer backs up .zshrc and replaces it, but Ansible already installed our preferred .zshrc - so move it back
+            mv "${home}/.zshrc.pre-oh-my-zsh" "${home}/.zshrc"
+        fi
     )
     if [ "${copyfromuser}" '!=' "${u}" ]; then
         cp "${configfiles}/.zshrc" "${home}/.zshrc"

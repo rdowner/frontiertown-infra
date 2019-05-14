@@ -25,19 +25,25 @@ case $distro_name in
     sudo apt-get upgrade -y
     sudo apt-get install -y git python-pip
     ;;
+  "CentOS Linux 7")
+    sudo yum install -y epel-release
+    sudo yum install -y python2-pip git
+    ;;
   "Darwin")
     brew install python
     export PATH="/usr/local/opt/python/libexec/bin:${PATH}"
-    export PATH="$( python -m site --user-base )/bin:$PATH"
     ;;
+  *)
+    echo "Could not identify a compatible OS from string: $distro_name"
+    exit
 esac
 
 status "Install/update pip and virtualenvwrapper"
 pip install --upgrade --user pip
 # bash remembers where commands are - tell it to forget pip, because we might have a new one now
 hash -d pip
-# Now put .local/bin at the front of the path, as that's where pip will be (except maybe on MacOS...?)
-export PATH="${HOME}/.local/bin:${PATH}"
+# Now put the location where pip install files onto the path (usually .local/bin on Linux, but different on MacOS)
+export PATH="$( python -m site --user-base )/bin:$PATH"
 
 pip install --user virtualenvwrapper
 export WORKON_HOME=~/Envs

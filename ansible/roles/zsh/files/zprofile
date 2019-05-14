@@ -18,5 +18,21 @@ function path_tail() { [ -d $1 ] && PATH=$PATH:$1 }
 [ -r ${HOME}/.zprofile.local ] && source ${HOME}/.zprofile.local
 
 path_head $HOME/bin
+path_head "$( python -m site --user-base )/bin"
+
+# Dedupe entries in PATH
+if [ -n "$PATH" ]; then
+  old_PATH=$PATH:; PATH=
+  while [ -n "$old_PATH" ]; do
+    x=${old_PATH%%:*}       # the first remaining entry
+    case $PATH: in
+      *:"$x":*) ;;          # already there
+      *) PATH=$PATH:$x;;    # not there yet
+    esac
+    old_PATH=${old_PATH#*:}
+  done
+  PATH=${PATH#:}
+  unset old_PATH x
+fi
 
 export PATH
