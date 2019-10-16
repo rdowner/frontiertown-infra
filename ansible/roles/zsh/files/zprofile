@@ -17,8 +17,16 @@ function path_tail() { [ -d $1 ] && PATH=$PATH:$1 }
 
 [ -r ${HOME}/.zprofile.local ] && source ${HOME}/.zprofile.local
 
-path_head $HOME/bin
+test -d "${HOME}/.linuxbrew" && lbhome="${HOME}/.linuxbrew" ||
+  test -d "/home/linuxbrew/.linuxbrew" && lbhome="/home/linuxbrew/.linuxbrew" ||
+  lbhome=""
+if [ ! -z "${lbhome}" ]; then
+  eval $("${lbhome}/bin/brew" shellenv)
+  path_head "${lbhome}/opt/python/libexec/bin"
+fi
+
 path_head "$( python -m site --user-base )/bin"
+path_head $HOME/bin
 
 # Dedupe entries in PATH
 if [ -n "$PATH" ]; then

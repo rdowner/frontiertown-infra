@@ -6,6 +6,31 @@ status() {
   echo >&2 "$(tput setaf 2)$@$(tput sgr0)"
 }
 
+locatelinuxbrew() {
+  test -d "${HOME}/.linuxbrew" && lbhome="${HOME}/.linuxbrew" ||
+    test -d "/home/linuxbrew/.linuxbrew" && lbhome="/home/linuxbrew/.linuxbrew" ||
+    lbhome=""
+}
+
+readylinuxbrew() {
+  locatelinuxbrew
+  if [ -z "${lbhome}" ]; then
+    status "Installing LinuxBrew"
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
+    locatelinuxbrew
+  fi
+  # Check that correct linuxbrew is on the path
+  if [ "$( which brew || true )" != "${lbhome}/bin/brew" ]; then
+    eval $("${lbhome}/bin/brew" shellenv)
+  fi
+}
+
+readylinuxbrewandpython() {
+  readylinuxbrew
+  brew install python3
+  export PATH="${lbhome}/opt/python/libexec/bin:${PATH}"
+}
+
 status "OS-specific preparation"
 if [ -f /etc/os-release ]; then
   eval $( source /etc/os-release && echo distro_name=\"$NAME $VERSION_ID\" )
@@ -14,23 +39,29 @@ elif [ -f /etc/system-release ]; then
 else
   distro_name="$( uname )"
 fi
+echo "Detected OS name: $distro_name"
 
 case $distro_name in
   "Amazon Linux 2"|"Amazon Linux release 2 "*)
     sudo yum update -y
-    sudo yum install -y git-core python2-pip util-linux-user
+    sudo yum groupinstall -y 'Development Tools'
+    sudo yum install -y curl file git
+    readylinuxbrewandpython
     ;;
   "Ubuntu 18.04")
     sudo apt-get update -y
     sudo apt-get upgrade -y
-    sudo apt-get install -y git python-pip
+    sudo apt-get install -y build-essential curl file git
+    readylinuxbrewandpython
     ;;
   "CentOS Linux 7")
-    sudo yum install -y epel-release
-    sudo yum install -y python2-pip git
+    sudo yum update -y
+    sudo yum groupinstall -y 'Development Tools'
+    sudo yum install -y curl file git
+    readylinuxbrewandpython
     ;;
   "Darwin")
-    brew install python
+    brew install python3
     export PATH="/usr/local/opt/python/libexec/bin:${PATH}"
     ;;
   *)
@@ -49,14 +80,21 @@ pip install --user virtualenvwrapper
 export WORKON_HOME=~/Envs
 source virtualenvwrapper.sh
 
+if [ ! -f /etc/ssh/ssh_host_rsa_key ]; then
+  status "Generating SSH host keys and starting server"
+  sudo /etc/init.d/ssh stop
+  sudo dpkg-reconfigure openssh-server
+  sudo /etc/init.d/ssh start
+fi
+
 status "Set up SSH-to-localhost"
-if [ '!' -f "${HOME}/.ssh/id_rsa" ]; then
-  ssh-keygen -t rsa -N '' -f "${HOME}/.ssh/id_rsa"
-fi
-if [ '!' -f "${HOME}/.ssh/id_rsa.pub" ]; then
-  ssh-keygen -y -f "${HOME}/.ssh/id_rsa" > "${HOME}/.ssh/id_rsa.pub"
-fi
+if [ '!' -f "${HOME}/.ssh/id_rsa" ]; then ssh-keygen -t rsa -N '' -f "${HOME}/.ssh/id_rsa"; fi
+if [ '!' -f "${HOME}/.ssh/id_rsa.pub" ]; then ssh-keygen -y -f "${HOME}/.ssh/id_rsa" > "${HOME}/.ssh/id_rsa.pub"; fi
 cat "${HOME}/.ssh/id_rsa.pub" >> "${HOME}/.ssh/authorized_keys"
+if [ '!' -f "${HOME}/.ssh/id_ecdsa" ]; then ssh-keygen -t ecdsa -N '' -f "${HOME}/.ssh/id_ecdsa"; fi
+if [ '!' -f "${HOME}/.ssh/id_ecdsa.pub" ]; then ssh-keygen -y -f "${HOME}/.ssh/id_ecdsa" > "${HOME}/.ssh/id_ecdsa.pub"; fi
+cat "${HOME}/.ssh/id_ecdsa.pub" >> "${HOME}/.ssh/authorized_keys"
+chmod go= "${HOME}/.ssh/authorized_keys"
 ssh-keyscan -H localhost >> ~/.ssh/known_hosts
 
 if [ '!' -d frontiertown-infra ]; then

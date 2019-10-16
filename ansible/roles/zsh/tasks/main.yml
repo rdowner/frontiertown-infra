@@ -13,6 +13,11 @@
   package: name=curl state=present
   become: "{{ 'no' if ansible_os_family == 'Darwin' else 'yes' }}"
 
+- name: Install util-linux-user
+  package: name=util-linux-user state=present
+  when: ansible_distribution == "Amazon"
+  become: yes
+
 - name: Install zshrc
   copy:
     src: zshrc
