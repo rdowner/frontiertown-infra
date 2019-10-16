@@ -2,7 +2,7 @@
 # Install GnuPG and configuration
 
 - name: Install GnuPG2
-  package: name=gnupg2 state=installed
+  package: name=gnupg2 state=present
   become: "{{ 'no' if ansible_os_family == 'Darwin' else 'yes' }}"
 
 - name: Create .gnupg directory

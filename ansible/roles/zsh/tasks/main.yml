@@ -2,15 +2,15 @@
 # This role installs ZSH and makes it the default shell for users
 
 - name: Install ZSH
-  package: name=zsh state=installed
+  package: name=zsh state=present
   become: "{{ 'no' if ansible_os_family == 'Darwin' else 'yes' }}"
 
 - name: Install Git (required for oh-my-zsh)
-  package: name=git state=installed
+  package: name=git state=present
   become: "{{ 'no' if ansible_os_family == 'Darwin' else 'yes' }}"
 
 - name: Install curl (required for oh-my-zsh)
-  package: name=curl state=installed
+  package: name=curl state=present
   become: "{{ 'no' if ansible_os_family == 'Darwin' else 'yes' }}"
 
 - name: Install zshrc

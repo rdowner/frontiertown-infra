@@ -2,7 +2,7 @@
 # Install git and a workstation .gitconfig
 
 - name: Install Git (required for oh-my-zsh)
-  package: name=git state=installed
+  package: name=git state=present
   become: "{{ 'no' if ansible_os_family == 'Darwin' else 'yes' }}"
 
 - name: Install .gitconfig
