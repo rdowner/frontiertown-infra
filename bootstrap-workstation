@@ -51,7 +51,7 @@ case $distro_name in
   "Ubuntu 18.04")
     sudo apt-get update -y
     sudo apt-get upgrade -y
-    sudo apt-get install -y build-essential curl file git
+    sudo apt-get install -y build-essential curl file git dos2unix
     readylinuxbrewandpython
     ;;
   "CentOS Linux 7")
@@ -112,6 +112,8 @@ all:
         127.0.0.1:
             ansible_user: ${LOGNAME}
 EOF
+sudo mkdir -p /etc/ansible/facts.d
+echo -e "[general]\nwsl=$( which cmd.exe >/dev/null && echo true || echo false )\n[environment]\nUSERPROFILE=$( cmd.exe /C echo %USERPROFILE% 2>/dev/null | dos2unix || true )\n[applications]\ngpg=$( which gpg.exe || echo "" )" | sudo tee /etc/ansible/facts.d/wsl.fact
 
 if [ '!' -d "${WORKON_HOME}/ansible" ]; then
   status "Create virtualenv for Ansible"

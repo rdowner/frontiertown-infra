@@ -4,6 +4,17 @@
 - name: Install GnuPG2
   package: name=gnupg2 state=present
   become: "{{ 'no' if ansible_os_family == 'Darwin' else 'yes' }}"
+  when: ansible_local['wsl']['applications']['gpg'] == ""
+
+- name: Uninstall gpg (on WSL, in favour of Windows executable)
+  package: name=gpg state=absent
+  become: "{{ 'no' if ansible_os_family == 'Darwin' else 'yes' }}"
+  when: ansible_local['wsl']['applications']['gpg'] != ""
+
+- name: Uninstall GnuPG2 (on WSL, in favour of Windows executable)
+  package: name=gnupg2 state=absent
+  become: "{{ 'no' if ansible_os_family == 'Darwin' else 'yes' }}"
+  when: ansible_local['wsl']['applications']['gpg'] != ""
 
 - name: Create .gnupg directory
   file:
@@ -11,15 +22,22 @@
     state: directory
     owner: "{{ansible_user}}"
     mode: 0700
+  when: ansible_local['wsl']['applications']['gpg'] == ""
 
 - name: Install gpg.conf
   copy:
     src: gpg.conf
     dest: ~{{ansible_user}}/.gnupg/gpg.conf
     owner: "{{ansible_user}}"
+  when: ansible_local['wsl']['applications']['gpg'] == ""
 
 - name: Install gpg-agent.conf
   copy:
     src: gpg-agent.conf
     dest: ~{{ansible_user}}/.gnupg/gpg-agent.conf
     owner: "{{ansible_user}}"
+  when: ansible_local['wsl']['applications']['gpg'] == ""
+
+- name: Link to GPG installed in Windows
+  script: files/link-to-windows-gpg.sh {{ ansible_local['wsl']['applications']['gpg'] | quote }}
+  when: ansible_local['wsl']['applications']['gpg'] != ""

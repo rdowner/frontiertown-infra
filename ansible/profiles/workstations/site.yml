@@ -2,7 +2,6 @@
 - hosts: all
   roles:
   - zsh
+  - gnupg
   - git-workstation
   - tmux
-  - gnupg
-  # - apache-brooklyn-dev
