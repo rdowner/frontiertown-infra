@@ -116,9 +116,15 @@ pipenv --python="${lbhome}/opt/python/libexec/bin/python" install
 
 status "Running Ansible playbook"
 ANSIBLE_OPTS=()
-if [ -t 1 ]
-then
+if sudo -n true 2>/dev/null; then 
+    true
+else
+  if [ -t 1 ]
+  then
     ANSIBLE_OPTS+=('--ask-become-pass')
+  else
+    echo >&2 "Sudo needs password but terminal is non-interactive; fail"; return 1
+  fi
 fi
 pipenv run ansible-playbook "${ANSIBLE_OPTS[@]}" profiles/workstations/site.yml
 
