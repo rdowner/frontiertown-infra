@@ -29,4 +29,4 @@
   when: ansible_local['wsl']['general']['wsl'] == "true"
 
 - name: Link to GnuPG for signing
-  script: files/link-to-gnupg.sh {{ ansible_local['wsl']['applications']['gpg'] | quote }}
+  script: files/link-to-gnupg.sh
