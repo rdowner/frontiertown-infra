@@ -1,12 +1,12 @@
 ---
 - name: Install Java (CentOS/RHEL)
   package: name=java-1.8.0-openjdk-headless state=present
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
   become: yes
 
 - name: Install JDK (CentOS/RHEL)
   package: name=java-1.8.0-openjdk-devel state=present
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
   become: yes
 
 - name: Install Java (Ubuntu/Debian)
@@ -45,7 +45,7 @@
 
 - name: Install libpng-devel (CentOS/RHEL)
   package: name=libpng-devel state=present
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
   become: yes
 
 - name: Install libpng-dev (Ubuntu/Debian)
@@ -69,8 +69,14 @@
   package: name=libtool state=present
   become: yes
 
-- name: Install pkgconfig
+- name: Install pkgconfig (CentOS/RHEL)
+  package: name=pkgconfig state=present
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
+  become: yes
+
+- name: Install pkgconfig (Ubuntu/Debian)
   package: name=pkg-config state=present
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
   become: yes
 
 - name: Install nasm
@@ -83,7 +89,7 @@
 
 - name: Install rpm-build (CentOS/RHEL)
   package: name=rpm-build state=present
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
   become: yes
 
 - name: Install rpm (Ubuntu/Debian)
@@ -91,7 +97,17 @@
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
   become: yes
 
+- name: Install perl-version (CentOS/RHEL)
+  package: name=perl-version state=present
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
+  become: yes
+
+- name: Install ncurses-devel (CentOS/RHEL)
+  package: name=ncurses-devel state=present
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
+  become: yes
+
 - name: Install dpkg (CentOS/RHEL)
   script: files/build-and-install-dpkg.sh
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
   become: yes
