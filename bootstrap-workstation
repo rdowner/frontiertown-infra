@@ -27,8 +27,9 @@ readylinuxbrew() {
 
 readylinuxbrewandpython() {
   readylinuxbrew
-  brew install python3
-  export PATH="${lbhome}/opt/python/libexec/bin:${PATH}"
+  brew install python  # selects Python 3 by default
+  export PATH="${lbhome}/opt/python/libexec/bin:${PATH}"  # put the unversion executables for python3 at the front of the path
+  pip install --upgrade pip setuptools pipenv
 }
 
 status "OS-specific preparation"
@@ -69,16 +70,8 @@ case $distro_name in
     exit
 esac
 
-status "Install/update pip and virtualenvwrapper"
-pip install --upgrade --user pip
-# bash remembers where commands are - tell it to forget pip, because we might have a new one now
-hash -d pip
-# Now put the location where pip install files onto the path (usually .local/bin on Linux, but different on MacOS)
+# Put the location where pip install files onto the path (usually .local/bin on Linux, but different on MacOS)
 export PATH="$( python -m site --user-base )/bin:$PATH"
-
-pip install --user virtualenvwrapper
-export WORKON_HOME=~/Envs
-source virtualenvwrapper.sh
 
 if [ ! -f /etc/ssh/ssh_host_rsa_key ]; then
   status "Generating SSH host keys and starting server"
@@ -102,7 +95,7 @@ if [ '!' -d frontiertown-infra ]; then
   git clone https://github.com/rdowner/frontiertown-infra.git
 fi
 
-status "Prepare Ansible"
+status "Configuring environment Ansible"
 cd frontiertown-infra/ansible
 eval $( ./activate-profile workstations )
 cat >profiles/workstations/hosts <<EOF
@@ -111,19 +104,15 @@ all:
     hosts:
         127.0.0.1:
             ansible_user: ${LOGNAME}
+            # Ansible must be run using the system Python interpreter, so that it can use system yum
+            ansible_python_interpreter: /usr/bin/python
 EOF
 sudo mkdir -p /etc/ansible/facts.d
 echo -e "[general]\nwsl=$( which cmd.exe >/dev/null && echo true || echo false )\n[environment]\nUSERPROFILE=$( cmd.exe /C echo %USERPROFILE% 2>/dev/null | dos2unix || true )\n[applications]\ngpg=$( which gpg.exe || echo "" )" | sudo tee /etc/ansible/facts.d/wsl.fact
 
-if [ '!' -d "${WORKON_HOME}/ansible" ]; then
-  status "Create virtualenv for Ansible"
-  /usr/bin/env bash -c '{ source virtualenvwrapper.sh; mkvirtualenv ansible; }'
-fi
-status "Activate Ansible"
-source "${WORKON_HOME}/ansible/bin/activate"
-
-status "Install Ansible"
-pip install --upgrade ansible
+status "Configuring Python environment for Ansible"
+pipenv --python="${lbhome}/opt/python/libexec/bin/python" install
+# need to specify --python above due to pipenv version 2018.11.26 bug - see https://github.com/pypa/pipenv/issues/3363
 
 status "Running Ansible playbook"
 ANSIBLE_OPTS=()
@@ -131,9 +120,6 @@ if [ -t 1 ]
 then
     ANSIBLE_OPTS+=('--ask-become-pass')
 fi
-ansible-playbook "${ANSIBLE_OPTS[@]}" profiles/workstations/site.yml
-
-status "Deactivate Ansible profile"
-deactivate
+pipenv run ansible-playbook "${ANSIBLE_OPTS[@]}" profiles/workstations/site.yml
 
 status "Done"
