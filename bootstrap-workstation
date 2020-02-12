@@ -108,7 +108,7 @@ all:
             ansible_python_interpreter: /usr/bin/python
 EOF
 sudo mkdir -p /etc/ansible/facts.d
-echo -e "[general]\nwsl=$( which cmd.exe >/dev/null && echo true || echo false )\n[environment]\nUSERPROFILE=$( cmd.exe /C echo %USERPROFILE% 2>/dev/null | dos2unix || true )\n[applications]\ngpg=$( which gpg.exe || echo "" )" | sudo tee /etc/ansible/facts.d/wsl.fact
+echo -e "[general]\nwsl=$( which cmd.exe >/dev/null && echo true || echo false )\n[environment]\nUSERPROFILE=$( cmd.exe /C echo %USERPROFILE% 2>/dev/null | dos2unix || true )\n[applications]\ngpg=$( which gpg.exe || echo "" )\npip=${lbhome}/opt/python/libexec/bin/pip\n" | sudo tee /etc/ansible/facts.d/wsl.fact
 
 status "Configuring Python environment for Ansible"
 pipenv --python="${lbhome}/opt/python/libexec/bin/python" install

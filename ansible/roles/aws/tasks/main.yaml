@@ -1,0 +1,25 @@
+---
+# Install AWS CLI and related tools
+
+- name: Install AWS CLI
+  pip:
+    name: awscli
+    state: present
+    executable: "{{ ansible_local['wsl']['applications']['pip'] | quote }}"
+
+- name: Install Password Store
+  homebrew:
+    name: pass
+    state: present
+
+- name: Install AWS Vault
+  homebrew:
+    name: aws-vault
+    state: present
+
+- name: Configure AWS Vault
+  script: files/configure-aws-vault.sh
+
+- name: Link to AWS Vault and Password Store to Windows configuration (if using WSL)
+  script: files/link-to-windows.sh {{ ansible_local['wsl']['environment']['userprofile'] | quote }}
+  when: ansible_local['wsl']['general']['wsl'] == "true"

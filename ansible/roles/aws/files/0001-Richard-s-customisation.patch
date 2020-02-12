@@ -1,0 +1,57 @@
+From 3f36496303def5867daea7a3a4d4f603ffafb072 Mon Sep 17 00:00:00 2001
+From: Richard Downer <richard@cloudsoft.io>
+Date: Tue, 17 Sep 2019 14:16:42 +0100
+Subject: [PATCH] Richard's customisation
+
+---
+ themes/agnoster.zsh-theme | 20 +++++++++++++++++---
+ 1 file changed, 17 insertions(+), 3 deletions(-)
+
+diff --git a/themes/agnoster.zsh-theme b/themes/agnoster.zsh-theme
+index 518a14a..042acfb 100644
+--- a/themes/agnoster.zsh-theme
++++ b/themes/agnoster.zsh-theme
+@@ -225,23 +225,37 @@ prompt_status() {
+ 
+ #AWS Profile:
+ # - display current AWS_PROFILE name
+-# - displays yellow on red if profile name contains 'production' or
+-#   ends in '-prod'
++# - displays black on red if profile name contains 'production' or
++#   '-prod' or '-super'
+ # - displays black on green otherwise
+ prompt_aws() {
+   [[ -z "$AWS_PROFILE" ]] && return
+   case "$AWS_PROFILE" in
+-    *-prod|*production*) prompt_segment red yellow  "AWS: $AWS_PROFILE" ;;
++    *-prod*|*production*|*-super*) prompt_segment red black  "AWS: $AWS_PROFILE" ;;
+     *) prompt_segment green black "AWS: $AWS_PROFILE" ;;
+   esac
+ }
+ 
++#AWS Vault Profile:
++# - display current AWS_VAULT name
++# - displays black on red if profile name contains 'production' or
++#   ends in '-prod'
++# - displays black on green otherwise
++prompt_aws_vault() {
++  [[ -z "$AWS_VAULT" ]] && return
++  case "$AWS_VAULT" in
++    *-prod*|*production*|*-super*) prompt_segment red black  "AWS: $AWS_VAULT" ;;
++    *) prompt_segment green black "AWS: $AWS_VAULT" ;;
++  esac
++}
++
+ ## Main prompt
+ build_prompt() {
+   RETVAL=$?
+   prompt_status
+   prompt_virtualenv
+   prompt_aws
++  prompt_aws_vault
+   prompt_context
+   prompt_dir
+   prompt_git
+-- 
+2.7.4
+
