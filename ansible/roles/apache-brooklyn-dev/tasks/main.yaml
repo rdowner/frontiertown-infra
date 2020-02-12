@@ -1,42 +1,97 @@
 ---
-- name: Install Java
-  package: name=java-1.8.0-openjdk-headless state=installed
+- name: Install Java (CentOS/RHEL)
+  package: name=java-1.8.0-openjdk-headless state=present
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  become: yes
 
-- name: Install JDK
-  package: name=java-1.8.0-openjdk-devel state=installed
+- name: Install JDK (CentOS/RHEL)
+  package: name=java-1.8.0-openjdk-devel state=present
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  become: yes
 
-- name: Install Golang
-  package: name=golang state=installed
+- name: Install Java (Ubuntu/Debian)
+  package: name=openjdk-8-jre state=present
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  become: yes
 
+- name: Install JDK (Ubuntu/Debian)
+  package: name=openjdk-8-jdk state=present
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  become: yes
+
+- name: Install Golang (system package manager)
+  package: name=golang state=present
+  when: not ansible_env.HOMEBREW_PREFIX
+  become: yes
+
+- name: Install Golang (brew package manager)
+  homebrew: name=golang state=present
+  when: ansible_env.HOMEBREW_PREFIX
+
+- name: Install Maven (system package manager)
+  package: name=maven state=present
+  when: not ansible_env.HOMEBREW_PREFIX
+  become: yes
+
+- name: Install Maven (brew package manager)
+  homebrew: name=maven state=present
+  when: ansible_env.HOMEBREW_PREFIX
+
+# The Brooklyn UI project wants some binaries, which it compiles itself. So we need a few dev tools...
+# This is the list from the Brooklyn Dockerfile
 - name: Install procps
-  package: name=procps state=installed
+  package: name=procps state=present
+  become: yes
 
-- name: Install libpng-devel
-  package: name=libpng-devel state=installed
+- name: Install libpng-devel (CentOS/RHEL)
+  package: name=libpng-devel state=present
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  become: yes
+
+- name: Install libpng-dev (Ubuntu/Debian)
+  package: name=libpng-dev state=present
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  become: yes
 
 - name: Install make
-  package: name=make state=installed
+  package: name=make state=present
+  become: yes
 
 - name: Install automake
-  package: name=automake state=installed
+  package: name=automake state=present
+  become: yes
 
 - name: Install autoconf
-  package: name=autoconf state=installed
+  package: name=autoconf state=present
+  become: yes
 
 - name: Install libtool
-  package: name=libtool state=installed
+  package: name=libtool state=present
+  become: yes
 
 - name: Install pkgconfig
-  package: name=pkg-config state=installed
+  package: name=pkg-config state=present
+  become: yes
 
 - name: Install nasm
-  package: name=nasm state=installed
+  package: name=nasm state=present
+  become: yes
 
 - name: Install gcc
-  package: name=gcc state=installed
+  package: name=gcc state=present
+  become: yes
 
-- name: Install rpm-build
-  package: name=rpm-build state=installed
+- name: Install rpm-build (CentOS/RHEL)
+  package: name=rpm-build state=present
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  become: yes
 
-- name: Install dpkg
+- name: Install rpm (Ubuntu/Debian)
+  package: name=rpm state=present
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  become: yes
+
+- name: Install dpkg (CentOS/RHEL)
   script: files/build-and-install-dpkg.sh
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  become: yes
