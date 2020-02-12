@@ -174,4 +174,6 @@ function aws-sts-decode-authorization-message() {
     aws sts --profile downer decode-authorization-message --encoded-message "$1" | ruby -e 'require "json"' -e 's = STDIN.read' -e 'o = JSON.parse(s)' -e 'puts o["DecodedMessage"]' | json_pp
 }
 
-[[ -s "$HOME/.profile" ]] && source "$HOME/.profile" # Load the default .profile
+function go-aws() {
+    aws-vault exec --assume-role-ttl=1h "$1" -- "${SHELL}"
+}
