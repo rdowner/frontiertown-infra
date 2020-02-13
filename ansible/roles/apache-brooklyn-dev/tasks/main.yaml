@@ -1,22 +1,30 @@
 ---
+- name: Install AdoptOpenJDK 8 Java (brew package manager)
+  homebrew: name=adoptopenjdk@8 state=present
+  when: ansible_env.HOMEBREW_PREFIX
+
 - name: Install Java (CentOS/RHEL)
   package: name=java-1.8.0-openjdk-headless state=present
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
+  when: not ansible_env.HOMEBREW_PREFIX and ( ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon' )
   become: yes
 
 - name: Install JDK (CentOS/RHEL)
   package: name=java-1.8.0-openjdk-devel state=present
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
+  when: not ansible_env.HOMEBREW_PREFIX and ( ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon' )
   become: yes
 
 - name: Install Java (Ubuntu/Debian)
   package: name=openjdk-8-jre state=present
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  when: not ansible_env.HOMEBREW_PREFIX and ( ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' )
   become: yes
 
 - name: Install JDK (Ubuntu/Debian)
   package: name=openjdk-8-jdk state=present
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  when: not ansible_env.HOMEBREW_PREFIX and ( ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' )
+  become: yes
+
+- name: Set JAVA_HOME
+  script: files/set-java-home.sh
   become: yes
 
 - name: Install Golang (system package manager)
@@ -36,6 +44,10 @@
 - name: Install Maven (brew package manager)
   homebrew: name=maven state=present
   when: ansible_env.HOMEBREW_PREFIX
+
+- name: Install Subversion
+  package: name=subversion state=present
+  become: yes
 
 # The Brooklyn UI project wants some binaries, which it compiles itself. So we need a few dev tools...
 # This is the list from the Brooklyn Dockerfile
