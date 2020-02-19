@@ -46,18 +46,6 @@ fi
 
 export PATH
 
-if [ -z "${JAVA_HOME}" ]; then
-  if which update-alternatives >/dev/null; then
-    export JAVA_HOME="$( dirname "$( dirname "$( update-alternatives --query javac | grep '^Value: ' | cut -d' ' -f2 )")")"
-  fi
-fi
-if [ -z "${JAVA_HOME}" ]; then
-  export JAVA_HOME="$( dirname "$( dirname "$( which javac )")")"
-fi
-
-# Maven
-# export MAVEN_OPTS="-Xmx512m -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=512M"
-
 # GnuPG
 export GPG_TTY="$(tty)"
 
