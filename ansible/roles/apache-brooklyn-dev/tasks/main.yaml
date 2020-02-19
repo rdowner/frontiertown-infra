@@ -25,28 +25,38 @@
 
 - name: Set JAVA_HOME
   script: files/set-java-home.sh
+  when: not ansible_env.JAVA_HOME
   become: yes
 
-- name: Install Golang (system package manager)
+- name: Install Golang (CentOS/RHEL)
+  package: name=golang-bin state=present
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
+  become: yes
+
+- name: Install Golang (Ubuntu/Debian)
   package: name=golang state=present
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  become: yes
+
+- name: Install XMLStarlet (system package manager)
+  package: name=xmlstarlet state=present
   when: not ansible_env.HOMEBREW_PREFIX
   become: yes
 
-- name: Install Golang (brew package manager)
-  homebrew: name=golang state=present
+- name: Install XMLStarlet (brew package manager)
+  homebrew: name=xmlstarlet state=present
   when: ansible_env.HOMEBREW_PREFIX
 
-- name: Install Maven (system package manager)
-  package: name=maven state=present
-  when: not ansible_env.HOMEBREW_PREFIX
-  become: yes
-
-- name: Install Maven (brew package manager)
-  homebrew: name=maven state=present
-  when: ansible_env.HOMEBREW_PREFIX
+- name: Install Maven
+  script: files/install-maven.sh
+  when: not ansible_env.MAVEN_HOME
 
 - name: Install Subversion
   package: name=subversion state=present
+  become: yes
+
+- name: Install FontConfig
+  package: name=fontconfig state=present
   become: yes
 
 # The Brooklyn UI project wants some binaries, which it compiles itself. So we need a few dev tools...

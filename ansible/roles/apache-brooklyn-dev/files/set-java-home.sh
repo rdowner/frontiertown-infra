@@ -11,4 +11,4 @@ while [[ $javahome =~ ([^/][^/]*/\.\./) ]]
 do
     javahome=${javahome/${BASH_REMATCH[0]}/}
 done
-echo "export JAVA_HOME=\"${javahome}\"" | sudo tee /etc/profile.d/set-java-home
+echo "export JAVA_HOME=\"${javahome}\"" | sudo tee /etc/profile.d/set-java-home.sh
