@@ -25,7 +25,7 @@
 
 - name: Set JAVA_HOME
   script: files/set-java-home.sh
-  when: not ansible_env.JAVA_HOME
+  when: ansible_env.JAVA_HOME is not defined
   become: yes
 
 - name: Install Golang (CentOS/RHEL)
@@ -49,7 +49,7 @@
 
 - name: Install Maven
   script: files/install-maven.sh
-  when: not ansible_env.MAVEN_HOME
+  when: ansible_env.MAVEN_HOME is not defined
 
 - name: Install Subversion
   package: name=subversion state=present
