@@ -26,7 +26,6 @@
 - name: Set JAVA_HOME
   script: files/set-java-home.sh
   when: ansible_env.JAVA_HOME is not defined
-  become: yes
 
 - name: Install Golang (CentOS/RHEL)
   package: name=golang-bin state=present
