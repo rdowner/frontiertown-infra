@@ -18,7 +18,7 @@ readylinuxbrew() {
     status "Installing LinuxBrew"
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
     locatelinuxbrew
-    echo "export PATH=\"${lbhome}:\${PATH}\"" >> ~/.bash_profile
+    echo "eval $("${lbhome}/bin/brew" shellenv)" >> ~/.bash_profile
   fi
   # Check that correct linuxbrew is on the path
   if [ "$( which brew || true )" != "${lbhome}/bin/brew" ]; then

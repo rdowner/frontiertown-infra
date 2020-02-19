@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-javac="$( which javac )"
+javac="$( which javac )" || { echo >&2 "Cannot find javac on patch - no JDK installed?"; exit 1; }
 while [ -L "${javac}" ]
 do
     javac="$( dirname "${javac}" )/$( readlink "${javac}" )"
