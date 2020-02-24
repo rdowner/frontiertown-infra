@@ -1,134 +1,154 @@
 ---
-- name: Install AdoptOpenJDK 8 Java (brew package manager)
-  homebrew: name=adoptopenjdk@8 state=present
+- name: Install required packages from Homebrew
+  homebrew:
+    name:
+      - adoptopenjdk@8
+      - go
+      - xmlstarlet
+      - gcc
+      - autoconf
+      - automake
+      - libtool
+      - pkg-config
+      - make
+      - libpng
+      - procps
+      - nasm
+      - rpm
+      - dpkg
+    state: preset
   when: ansible_env.HOMEBREW_PREFIX
 
-- name: Install Java (CentOS/RHEL)
-  package: name=java-1.8.0-openjdk-headless state=present
-  when: not ansible_env.HOMEBREW_PREFIX and ( ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon' )
-  become: yes
 
-- name: Install JDK (CentOS/RHEL)
-  package: name=java-1.8.0-openjdk-devel state=present
-  when: not ansible_env.HOMEBREW_PREFIX and ( ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon' )
-  become: yes
 
-- name: Install Java (Ubuntu/Debian)
-  package: name=openjdk-8-jre state=present
-  when: not ansible_env.HOMEBREW_PREFIX and ( ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' )
-  become: yes
 
-- name: Install JDK (Ubuntu/Debian)
-  package: name=openjdk-8-jdk state=present
-  when: not ansible_env.HOMEBREW_PREFIX and ( ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' )
-  become: yes
 
-- name: Set JAVA_HOME
-  script: files/set-java-home.sh
-  when: ansible_env.JAVA_HOME is not defined
+# - name: Install Java (CentOS/RHEL)
+#   package: name=java-1.8.0-openjdk-headless state=present
+#   when: not ansible_env.HOMEBREW_PREFIX and ( ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon' )
+#   become: yes
 
-- name: Install Golang (CentOS/RHEL)
-  package: name=golang-bin state=present
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
-  become: yes
+# - name: Install JDK (CentOS/RHEL)
+#   package: name=java-1.8.0-openjdk-devel state=present
+#   when: not ansible_env.HOMEBREW_PREFIX and ( ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon' )
+#   become: yes
 
-- name: Install Golang (Ubuntu/Debian)
-  package: name=golang state=present
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
-  become: yes
+# - name: Install Java (Ubuntu/Debian)
+#   package: name=openjdk-8-jre state=present
+#   when: not ansible_env.HOMEBREW_PREFIX and ( ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' )
+#   become: yes
 
-- name: Install XMLStarlet (system package manager)
-  package: name=xmlstarlet state=present
-  when: not ansible_env.HOMEBREW_PREFIX
-  become: yes
+# - name: Install JDK (Ubuntu/Debian)
+#   package: name=openjdk-8-jdk state=present
+#   when: not ansible_env.HOMEBREW_PREFIX and ( ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' )
+#   become: yes
 
-- name: Install XMLStarlet (brew package manager)
-  homebrew: name=xmlstarlet state=present
-  when: ansible_env.HOMEBREW_PREFIX
+# - name: Set JAVA_HOME
+#   script: files/set-java-home.sh
+#   when: ansible_env.JAVA_HOME is not defined
 
-- name: Install Maven
-  script: files/install-maven.sh
-  when: ansible_env.MAVEN_HOME is not defined
+# - name: Install Golang (CentOS/RHEL)
+#   package: name=golang-bin state=present
+#   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
+#   become: yes
 
-- name: Install Subversion
-  package: name=subversion state=present
-  become: yes
+# - name: Install Golang (Ubuntu/Debian)
+#   package: name=golang state=present
+#   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+#   become: yes
 
-- name: Install FontConfig
-  package: name=fontconfig state=present
-  become: yes
+# - name: Install XMLStarlet (system package manager)
+#   package: name=xmlstarlet state=present
+#   when: not ansible_env.HOMEBREW_PREFIX
+#   become: yes
 
-# The Brooklyn UI project wants some binaries, which it compiles itself. So we need a few dev tools...
-# This is the list from the Brooklyn Dockerfile
-- name: Install procps
-  package: name=procps state=present
-  become: yes
+# - name: Install XMLStarlet (brew package manager)
+#   homebrew: name=xmlstarlet state=present
+#   when: ansible_env.HOMEBREW_PREFIX
 
-- name: Install libpng-devel (CentOS/RHEL)
-  package: name=libpng-devel state=present
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
-  become: yes
+# - name: Install Maven
+#   script: files/install-maven.sh
+#   when: ansible_env.MAVEN_HOME is not defined
 
-- name: Install libpng-dev (Ubuntu/Debian)
-  package: name=libpng-dev state=present
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
-  become: yes
+# - name: Install Subversion
+#   package: name=subversion state=present
+#   become: yes
 
-- name: Install make
-  package: name=make state=present
-  become: yes
+# - name: Install FontConfig
+#   package: name=fontconfig state=present
+#   become: yes
 
-- name: Install automake
-  package: name=automake state=present
-  become: yes
+# # The Brooklyn UI project wants some binaries, which it compiles itself. So we need a few dev tools...
+# # This is the list from the Brooklyn Dockerfile
+# - name: Install procps
+#   package: name=procps state=present
+#   become: yes
 
-- name: Install autoconf
-  package: name=autoconf state=present
-  become: yes
+# - name: Install libpng-devel (CentOS/RHEL)
+#   package: name=libpng-devel state=present
+#   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
+#   become: yes
 
-- name: Install libtool
-  package: name=libtool state=present
-  become: yes
+# - name: Install libpng-dev (Ubuntu/Debian)
+#   package: name=libpng-dev state=present
+#   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+#   become: yes
 
-- name: Install pkgconfig (CentOS/RHEL)
-  package: name=pkgconfig state=present
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
-  become: yes
+# - name: Install make
+#   package: name=make state=present
+#   become: yes
 
-- name: Install pkgconfig (Ubuntu/Debian)
-  package: name=pkg-config state=present
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
-  become: yes
+# - name: Install automake
+#   package: name=automake state=present
+#   become: yes
 
-- name: Install nasm
-  package: name=nasm state=present
-  become: yes
+# - name: Install autoconf
+#   package: name=autoconf state=present
+#   become: yes
 
-- name: Install gcc
-  package: name=gcc state=present
-  become: yes
+# - name: Install libtool
+#   package: name=libtool state=present
+#   become: yes
 
-- name: Install rpm-build (CentOS/RHEL)
-  package: name=rpm-build state=present
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
-  become: yes
+# - name: Install pkgconfig (CentOS/RHEL)
+#   package: name=pkgconfig state=present
+#   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
+#   become: yes
 
-- name: Install rpm (Ubuntu/Debian)
-  package: name=rpm state=present
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
-  become: yes
+# - name: Install pkgconfig (Ubuntu/Debian)
+#   package: name=pkg-config state=present
+#   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+#   become: yes
 
-- name: Install perl-version (CentOS/RHEL)
-  package: name=perl-version state=present
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
-  become: yes
+# - name: Install nasm
+#   package: name=nasm state=present
+#   become: yes
 
-- name: Install ncurses-devel (CentOS/RHEL)
-  package: name=ncurses-devel state=present
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
-  become: yes
+# - name: Install gcc
+#   package: name=gcc state=present
+#   become: yes
 
-- name: Install dpkg (CentOS/RHEL)
-  script: files/build-and-install-dpkg.sh
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
-  become: yes
+# - name: Install rpm-build (CentOS/RHEL)
+#   package: name=rpm-build state=present
+#   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
+#   become: yes
+
+# - name: Install rpm (Ubuntu/Debian)
+#   package: name=rpm state=present
+#   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+#   become: yes
+
+# - name: Install perl-version (CentOS/RHEL)
+#   package: name=perl-version state=present
+#   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
+#   become: yes
+
+# - name: Install ncurses-devel (CentOS/RHEL)
+#   package: name=ncurses-devel state=present
+#   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
+#   become: yes
+
+# - name: Install dpkg (CentOS/RHEL)
+#   script: files/build-and-install-dpkg.sh
+#   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'Amazon'
+#   become: yes

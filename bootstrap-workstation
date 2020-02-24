@@ -46,20 +46,18 @@ echo "Detected OS name: $distro_name"
 case $distro_name in
   "Amazon Linux 2"|"Amazon Linux release 2 "*)
     sudo yum update -y
-    sudo yum groupinstall -y 'Development Tools'
-    sudo yum install -y curl file git
+    sudo yum install -y curl file git dos2unix
     readylinuxbrewandpython
     ;;
   "Ubuntu 18.04")
     sudo apt-get update -y
     sudo apt-get upgrade -y
-    sudo apt-get install -y build-essential curl file git dos2unix
+    sudo apt-get install -y curl file git dos2unix
     readylinuxbrewandpython
     ;;
   "CentOS Linux 7")
     sudo yum update -y
-    sudo yum groupinstall -y 'Development Tools'
-    sudo yum install -y curl file git
+    sudo yum install -y curl file git dos2unix
     readylinuxbrewandpython
     ;;
   "Darwin")
