@@ -16,7 +16,7 @@
       - nasm
       - rpm
       - dpkg
-    state: preset
+    state: present
   when: ansible_env.HOMEBREW_PREFIX
 
 
