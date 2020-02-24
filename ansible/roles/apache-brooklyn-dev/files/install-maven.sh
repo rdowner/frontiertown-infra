@@ -10,7 +10,7 @@ dest=/usr/local/share
 mhome="${dest}/apache-maven-${version}"
 
 wget -O "${archive}" "${url}"
-tar -C "${dest}" -xzf "${archive}"
+sudo tar -C "${dest}" -xzf "${archive}"
 [ -e /usr/local/bin/mvn ] && sudo rm /usr/local/bin/mvn
 sudo ln -s "${mhome}/bin/mvn" /usr/local/bin/mvn
 
